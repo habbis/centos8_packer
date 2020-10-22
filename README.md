@@ -1,4 +1,4 @@
-# centos8_packer vshere 
+# centos8 packer vshere 
 
 THis creates a vmware vshere virtual machine centos [kickstartfile](https/ks_test.cfg) should also work for cenots7.
 
