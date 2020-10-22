@@ -1,0 +1,99 @@
+{
+  "builders": [
+    {
+      "boot_command": [
+         "i<tab>",
+         " inst.text",
+         " inst.sshd",
+         " inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{user `kickstart`}}",
+         " <enter><wait>"
+       ],
+
+      "type": "vsphere-iso",
+      "vcenter_server": "{{user `vcenter`}}",
+      "cluster": "{{user `esx_cluster`}}",
+      "datacenter": "{{user `datacenter`}}",
+      "resource_pool": "{{user `resource_pool`}}",
+      "datastore": "{{user `esx_datastore`}}",
+      "host": "{{user `esx_host`}}",
+      "folder": "Discovered virtual machine",
+      "username": "{{user `vsphere_username`}}",
+      "password": "{{user `vsphere_password`}}",
+      "insecure_connection": "true",
+
+      "iso_paths": [
+        "[iso] CentOS-8.2.2004-x86_64-dvd1.iso"
+      ],
+
+      "vm_name": "{{user `vm_name`}}",
+      "guest_os_type": "centos8_64Guest",
+
+      "CPUs": 2,
+      "CPU_hot_plug": true,
+      "RAM": 4024,
+      "RAM_reserve_all": true,
+      "RAM_hot_plug":true,
+
+      "network_adapters": [
+        {
+          "network": "{{user `network`}}",
+          "network_card": "vmxnet3"
+        }
+      ],
+
+      "disk_controller_type": "pvscsi",
+      "storage": [
+        {
+          "disk_size": 25000,
+          "disk_thin_provisioned": true
+        }
+      ],
+
+      "convert_to_template": false,
+      "http_directory": "http",
+      "floppy_files": [
+        "./http/{{user `kickstart`}}"
+      ],
+
+      "notes": "Build via Packer",
+      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_password": "{{user `ssh_password`}}",
+      "ssh_port": 22
+
+      }
+],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "playbook_file": "./{{user `ansible_playbook`}}"
+    }
+  ],
+"post-processors": [
+{
+  "type": "vsphere-template",
+  "host": "{{user `vcenter`}}",
+  "insecure": true,
+  "username": "{{user `vsphere_username`}}",
+  "password": "{{user `vsphere_password`}}",
+  "datacenter": "{{user `datacenter`}}",
+  "folder": "/Discovered virtual machine/"
+}
+    ],
+    "variables": {
+       "vcenter": "your_vcenter",
+       "datacenter":"your_datacenter",
+       "esx_cluster":"yourcluster",
+       "resource_pool":"yourpool",
+       "esx_host":"youreesxi",
+       "esx_datastore":"yourdatastore",
+       "vsphere_username":"youruser",
+       "vsphere_password":"yourpass",
+       "network":"test",
+       "datastore_iso":"CentOS-8.2.2004-x86_64-minimal.iso",
+       "vm_name": "c8_test_template_lite",
+       "ansible_playbook":"server-lite.yml",
+       "kickstart":"ks_test.cfg",
+       "ssh_username":"root",
+       "ssh_password": "yourpass"
+      }
+}
